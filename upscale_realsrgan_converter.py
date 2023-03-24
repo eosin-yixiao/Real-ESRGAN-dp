@@ -8,10 +8,10 @@ from basicsr.utils.download_util import load_file_from_url
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
-def upscale_ai(image_path, model_name = 'RealESRGAN_x4plus', model_path = None, outscale = 4,  face_enhance = 'false'):
+def upscale_ai(img, model_name = 'realesr-general-x4v3', model_path = None, outscale = 4,  face_enhance = 'false'):
 
     model_name = model_name        # type=str, default='RealESRGAN_x4plus',
-                                   # Model names: RealESRGAN_x4plus | RealESRNet_x4plus | RealESRGAN_x4plus_anime_6B | RealESRGAN_x2plus | realesr-animevideov3 | realesr-general-x4v3'
+                                   # Model names: RealESRGAN_x4plus | RealESRNet_x4plus | RealESRGAN_x4plus_anime_6B | # RealESRGAN_x2plus | realesr-animevideov3 | realesr-general-x4v3'
     tile = 0                       # Tile size, 0 for no tile during testing
     tile_pad = 10                  # default=10, 'Tile padding'
     pre_pad = 0                    # Pre padding size at each border
@@ -19,7 +19,7 @@ def upscale_ai(image_path, model_name = 'RealESRGAN_x4plus', model_path = None, 
     fp32 = "store_true"            # Use fp32 precision during inference. Default: fp16 (half precision).
     gpu_id = None                  # default=None, help='gpu device to use (default=None) can be 0,1,2 for multi-gpu').
     outscale = outscale            # type=float, default=4, help='The final upsampling scale of the image'
-    denoise_strength = 0.5         # type=float, default=0.5, 'Denoise strength. 0 for weak denoise (keep noise), 1 for strong denoise ability.
+    denoise_strength = 0.2         # type=float, default=0.5, 'Denoise strength. 0 for weak denoise (keep noise), 1 for                             # strong denoise ability.
                                    # 'Only used for the realesr-general-x4v3 model')
 
     # determine models according to model names
@@ -94,7 +94,7 @@ def upscale_ai(image_path, model_name = 'RealESRGAN_x4plus', model_path = None, 
             channel_multiplier=2,
             bg_upsampler=upsampler)
 
-    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    # img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     if len(img.shape) == 3 and img.shape[2] == 4:
         img_mode = 'RGBA'
     else:
@@ -119,7 +119,22 @@ def upscale_ai(image_path, model_name = 'RealESRGAN_x4plus', model_path = None, 
 
 
 def main():
-    upscale_ai('C:/dev/super-resolution/Real-ESRGAN/image/00003.png')
+    image_path = 'C:/dev/super-resolution/Real-ESRGAN-dp/image/test_rgb.jpg'
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+
+    scale_percent = 25 # percent of original size
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    downsample_image = cv2.resize(img, dim, interpolation=cv2.INTER_CUBIC)
+
+    print('Resized Dimensions : ',downsample_image.shape)
+
+    cv2.imshow("Resized image", downsample_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    upscale_ai(downsample_image)
     # """Inference demo for Real-ESRGAN.
     # """
     # parser = argparse.ArgumentParser()
